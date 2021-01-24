@@ -1,9 +1,16 @@
-import React, {useEffect, useRef} from 'react'
+import React, { useEffect, useRef } from 'react'
 
-export const SearchResults = ({ searchResults=[], searchValue=""}) => {
+export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelected=false, currentIndex=-1}) => {
   const searchValueToLowerCase = searchValue.toLowerCase()
   const resultsList = useRef(null)
-  let currentIndex = -1
+
+  useEffect(() => {
+    document.addEventListener('keydown', event => handleKeyBoardSupport(event))
+
+    if(setItemAsSelected) setFirstItemAsSelected()
+
+    return document.removeEventListener('keyDown', handleKeyBoardSupport)
+  }, [])
 
   const handleKeyBoardSupport = (event) => {
     const listItems = resultsList.current.children;
@@ -14,8 +21,8 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
       currentIndex--
 
       [...listItems].forEach(item => (item.tabIndex === currentIndex)
-        ? (item.ariaSelected = true, item.focus(), item.id="selected-option")
-        : (item.ariaSelected = false, item.id = ""))
+        ? (item.ariaSelected = true, item.focus(), item.id="selected-option", item.classList.add('search-results-link--focused'))
+        : (item.ariaSelected = false, item.id = "", item.classList.remove('search-results-link--focused')))
     }
 
     if(event.key === 'ArrowDown') {
@@ -25,8 +32,8 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
       currentIndex++
 
       [...listItems].forEach(item => (item.tabIndex === currentIndex)
-        ? (item.ariaSelected = true, item.focus(), item.id="selected-option")
-        : (item.ariaSelected = false, item.id = ""))
+        ? (item.ariaSelected = true, item.focus(), item.id="selected-option", item.classList.add('search-results-link--focused'))
+        : (item.ariaSelected = false, item.id = "", item.classList.remove('search-results-link--focused')))
     }
 
     if(event.key === 'Enter') {
@@ -39,13 +46,13 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
 
     [...listItems].map((item, index) => {
       if(index === 0) {
-        item.classList.add('is-selected')
+        item.classList.add('search-results-link--focused')
         item.ariaSelected = true
         item.tabIndex = 0
         item.id="selected-option"
         return item.focus()
       } else {
-        item.classList.remove('is-selected')
+        item.classList.remove('search-results-link--focused')
         item.ariaSelected = false
         item.id = ""
         return item.tabIndex = index
@@ -53,14 +60,9 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
     })
   }
 
-  useEffect(() => {
-    document.addEventListener('keydown', event => handleKeyBoardSupport(event))
-
-    return document.removeEventListener('keyDown', handleKeyBoardSupport)
-  }, [])
 
   return (
-    <div className="search-results" role="listbox" id="search-results" ref={resultsList}>
+    <div className={(searchResults.length > 0) ? "search-results search-resutls--fade-in" : "search-results"} role="listbox" id="search-results" ref={resultsList}>
       {[...searchResults].map((item, index) => {
         const name = item.searchterm.toLowerCase()
         return (
@@ -70,7 +72,7 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
             role="option"
             aria-selected={index === 0 ? true : false}
             id={index === 0 ? "selected-option" : ""}
-            className="search-results-link"
+            className={"search-results-link"}
           >
             {[...name].map((letter, index) =>
               (searchValueToLowerCase.includes(letter))

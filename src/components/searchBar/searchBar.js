@@ -5,21 +5,23 @@ import { ReactComponent as SearchIcon} from '../../assets/icons/search.svg'
 import { ReactComponent as CrossIcon } from '../../assets/icons/cross.svg'
 import { ReactComponent as ExclamationMark } from '../../assets/icons/exclamation-mark.svg'
 
-export const SearchBar = ({ label="" }) => {
+export const SearchBar = ({ label, searchInputValue="" }) => {
   const noResultsState = 'No results found with: '
   const notValidState = 'Not a valid input. Only alpha numeric values are accepted'
-  const defaultState = 'idle'
+  const defaultState = 'Idle'
   const errorState = 'Error occured while quering data'
   const isValidAlphaNumericStringExp = new RegExp(/^[\w\-\s]+$/)
   const host = 'http://localhost:3000'
   const searchEndpoint = '/search'
-  const searchInputEl = useRef(null)
 
   const [ searchBarState, setSearchBarState ] = useState(defaultState)
-	const [ searchValue, setSearchValue] = useState("")
-	const [ searchResults, setSearchResults] = useState([])
+	const [ searchValue, setSearchValue] = useState(searchInputValue)
+  const [ searchResults, setSearchResults] = useState([])
+  const [ inputIsFocused, setInputIsFocused ] = useState(false)
+  const [ currentIndex, setCurrentIndex ] = useState(-1)
 
 	useEffect(() => {
+
     if([...searchValue].length > 2) {
       fetchData(searchValue)
     } else {
@@ -57,23 +59,22 @@ export const SearchBar = ({ label="" }) => {
   }
 
   const validateSearchValue = (value) => isValidAlphaNumericStringExp.test(value)
-
-  const onSubmit = (event) => {
-    event.preventDefault()
+  const clearInput = () => {
+    setSearchValue("")
+    setCurrentIndex(-1)
   }
-
 	return (
     <>
-      <form className="searchbar" aria-haspopup="listbox" aria-expanded={searchResults.length > 0 ? "true": false} role="combobox"
-        aria-owns="search-results" aria-controls="search-results" onSubmit={onSubmit} action="/">
-        <input className="searchbar-input"
+      <form className="searchbar" aria-haspopup="listbox" aria-expanded={searchResults.length > 0 ? "true": "false"} role="combobox"
+        aria-owns="search-results" aria-controls="search-results" onSubmit={(event) => event.preventDefault()} action="/">
+        <input className={ (inputIsFocused) ? "searchbar-input searchbar-input--focused" : "searchbar-input"}
           type="search"
           placeholder={label}
           aria-label="search-results"
           aria-autocomplete="list"
           aria-activedescendant="selected-option"
           value={searchValue}
-          ref={searchInputEl}
+          onFocus={() => setInputIsFocused(true)}
           onChange={event => validateSearchValue(event.target.value) || (event.target.value === "")
             ? setSearchValue(event.target.value)
             : setSearchBarState(notValidState)
@@ -81,7 +82,7 @@ export const SearchBar = ({ label="" }) => {
         />
         <button className={`searchbar-icon ${searchValue === '' ? 'is-hidden' : 'searchbar-icon--cross'} `}
           aria-label="Clear search value"
-          onClick={() => setSearchValue("")}>
+          onClick={() => clearInput()}>
           <CrossIcon />
         </button>
         <div className="searchbar-icon">
@@ -101,13 +102,13 @@ export const SearchBar = ({ label="" }) => {
         </div>
       }
 
-      { searchResults && <SearchResults searchResults={searchResults} searchValue={searchValue}/> }
+      { searchResults && <SearchResults searchResults={searchResults} searchValue={searchValue} currentIndex={currentIndex}/> }
     </>
 	)
 }
 
 SearchBar.propTypes = {
-	label: PropTypes.string.isRequired
+	label: PropTypes.string
 }
 
 export default SearchBar

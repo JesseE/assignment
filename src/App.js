@@ -1,15 +1,17 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import { SearchBar } from './components/searchBar/searchBar'
 
-class App extends Component {
-  render() {
-    return (
-      <>
-        <SearchBar label="Search for clothing" />
-      </>
-    );
+const App = () => {
+  const props = {
+    label: 'Search'
   }
+
+  return (
+    <>
+      <SearchBar {...props} />
+    </>
+  )
 }
 
 export default App;

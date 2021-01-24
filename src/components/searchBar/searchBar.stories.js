@@ -3,32 +3,15 @@ import React from 'react'
 import { SearchBar } from './searchBar'
 
 export default {
-	title: 'SearchBar'
+  component: SearchBar,
+  title: 'SearchBar',
 }
 
-const Template = (args) => <SearchBar {...args}/>
+export const Default = () => <SearchBar label="Search for items" searchInputValue="" />;
 
-export const Default = Template.bind({})
+export const SuccessfullQuery = () => <SearchBar label="Search for items" searchInputValue="trui" />;
 
-Default.args = {
-	label: 'Search for clothing'
-}
+export const InvalidQuery = () => <SearchBar label="Search for items" searchInputValue="*#(*%&#" />;
 
-export const Focused = Template.bind({})
-
-Focused.args = {
-  label: '',
-}
-
-export const Filled = Template.bind({})
-
-Filled.args = {
-  label: '',
-}
-
-export const Failed = Template.bind({})
-
-Failed.args = {
-  label: '',
-}
+export const NoResultsQuery = () => <SearchBar label="Search for items" searchInputValue="jesse" />;
 
