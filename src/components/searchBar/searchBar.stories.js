@@ -11,7 +11,7 @@ const Template = (args) => <SearchBar {...args}/>
 export const Default = Template.bind({})
 
 Default.args = {
-	label: 'Try typing a search query'
+	label: 'Search for clothing'
 }
 
 export const Focused = Template.bind({})

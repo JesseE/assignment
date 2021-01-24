@@ -14,8 +14,8 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
       currentIndex--
 
       [...listItems].forEach(item => (item.tabIndex === currentIndex)
-        ? (item.ariaSelected = true, item.focus())
-        : item.ariaSelected = false)
+        ? (item.ariaSelected = true, item.focus(), item.id="selected-option")
+        : (item.ariaSelected = false, item.id = ""))
     }
 
     if(event.key === 'ArrowDown') {
@@ -25,8 +25,8 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
       currentIndex++
 
       [...listItems].forEach(item => (item.tabIndex === currentIndex)
-        ? (item.ariaSelected = true, item.focus())
-        : item.ariaSelected = false)
+        ? (item.ariaSelected = true, item.focus(), item.id="selected-option")
+        : (item.ariaSelected = false, item.id = ""))
     }
 
     if(event.key === 'Enter') {
@@ -42,10 +42,12 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
         item.classList.add('is-selected')
         item.ariaSelected = true
         item.tabIndex = 0
+        item.id="selected-option"
         return item.focus()
       } else {
         item.classList.remove('is-selected')
         item.ariaSelected = false
+        item.id = ""
         return item.tabIndex = index
       }
     })
@@ -67,7 +69,7 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
             aria-label={name}
             role="option"
             aria-selected={index === 0 ? true : false}
-            id="selected-option"
+            id={index === 0 ? "selected-option" : ""}
             className="search-results-link"
           >
             {[...name].map((letter, index) =>
@@ -75,6 +77,7 @@ export const SearchResults = ({ searchResults=[], searchValue=""}) => {
                 ? <span className="search-results-letter search-results-letter--bold" key={`${letter}--${index}`}>{letter}</span>
                 : <span className="search-results-letter" key={`${letter}--${index}`}>{letter}</span>
             )}
+            <span> ({item.nrResults})</span>
           </a>
         )
       })}

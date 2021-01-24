@@ -34,7 +34,6 @@
   margin-right: 40px;
   height: 33px;
   width: 33px;
-
 }
 
 .searchbar-icon--cross:focus {
@@ -47,6 +46,31 @@
 
 .searchbar-icon path {
   fill: #333;
+}
+
+.searchbar-message svg {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.searchbar-message {
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 10px;
+  color: black;
+  font-size: 0.875rem;
+}
+
+.searchbar-message--error svg path,
+.searchbar-message--not-valid svg path {
+  fill: crimson;
+}
+
+.searchbar-message--no-results svg path {
+  fill: orange;
 }
 
 @media only screen and (min-width: 480px) {

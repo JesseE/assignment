@@ -3,16 +3,16 @@ import PropTypes from 'prop-types'
 import SearchResults from '../searchResults/searchResults'
 import { ReactComponent as SearchIcon} from '../../assets/icons/search.svg'
 import { ReactComponent as CrossIcon } from '../../assets/icons/cross.svg'
+import { ReactComponent as ExclamationMark } from '../../assets/icons/exclamation-mark.svg'
 
 export const SearchBar = ({ label="" }) => {
   const noResultsState = 'No results found with: '
-  const notValidState = 'not valid input only alpha numeric values are accepted'
+  const notValidState = 'Not a valid input. Only alpha numeric values are accepted'
   const defaultState = 'idle'
   const errorState = 'Error occured while quering data'
   const isValidAlphaNumericStringExp = new RegExp(/^[\w\-\s]+$/)
   const host = 'http://localhost:3000'
   const searchEndpoint = '/search'
-  const clearInputEl = useRef(null)
   const searchInputEl = useRef(null)
 
   const [ searchBarState, setSearchBarState ] = useState(defaultState)
@@ -37,15 +37,16 @@ export const SearchBar = ({ label="" }) => {
         const checkIfTrue = item => item.includes(searchValue.toLowerCase())
 
         if (searchValueFound.some(checkIfTrue)) {
-          setSearchResults(data.suggestions)
+          const filterValues = data.suggestions
+            .filter(({searchterm}) => searchterm.includes(searchValue))
+
+          setSearchResults(filterValues)
           setSearchBarState(defaultState)
         } else {
           setSearchBarState(noResultsState)
         }
 
-        if(searchValue === '') {
-          setSearchBarState(noResultsState)
-        }
+        if(searchValue === '') return setSearchBarState(noResultsState)
 			})
 			.catch(err => {
         setSearchBarState(errorState)
@@ -78,21 +79,25 @@ export const SearchBar = ({ label="" }) => {
             : setSearchBarState(notValidState)
           }
         />
-        <button aria-label="Clear search value" className={`searchbar-icon ${searchValue === '' ? 'is-hidden' : 'searchbar-icon--cross'} `} onClick={() => setSearchValue("")}>
+        <button className={`searchbar-icon ${searchValue === '' ? 'is-hidden' : 'searchbar-icon--cross'} `}
+          aria-label="Clear search value"
+          onClick={() => setSearchValue("")}>
           <CrossIcon />
         </button>
         <div className="searchbar-icon">
           <SearchIcon />
         </div>
       </form>
-      { searchBarState === noResultsState &&
-        <div className="searchbar-message">
-            <span>{searchBarState}{searchValue}</span>
+
+      { searchBarState === noResultsState && !searchResults.length > 0 &&
+        <div id="selected-option" className="searchbar-message searchbar-message--no-results">
+          <ExclamationMark /><span>{searchBarState}{searchValue}. Try searching: trui</span>
         </div>
       }
-      { searchBarState === notValidState &&
-        <div className="searchbar-message">
-            <span>{searchBarState}</span>
+
+      { searchBarState === notValidState && !searchResults.length > 0 &&
+        <div id="selected-option" className="searchbar-message searchbar-message--not-valid">
+          <ExclamationMark /><span>{searchBarState}</span>
         </div>
       }
 

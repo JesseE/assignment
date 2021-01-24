@@ -6,7 +6,7 @@ class App extends Component {
   render() {
     return (
       <>
-        <SearchBar label="Search" />
+        <SearchBar label="Search for clothing" />
       </>
     );
   }
