@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import SearchResults from './searchResults'
-import Enzyme, { shallow } from 'enzyme';
+import Enzyme, { shallow, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { getMockData } from '../../api/MockApi';
 
@@ -40,10 +40,18 @@ describe('SearchResults component', () => {
   })
 
   it('Fetches mockdata from the api succesfully', async () => {
-    const getData = await getMockData('trui')
+    const searchValue = "trui"
+    const host = 'http://localhost:3000'
+    const searchEndpoint = '/search'
+    const getData = await getMockData(searchValue,host,searchEndpoint)
 
     expect(getData).toEqual(testMockData)
     expect(fetch).toHaveBeenCalledTimes(1)
     expect(fetch).toHaveBeenCalledWith('http://localhost:3000/search?searchterm=trui')
+  })
+
+  it('Search results to have children when data is passed in', () => {
+    const wrapper = mount(<SearchResults searchResults={testMockData} />)
+    expect(wrapper.find('.search-results').children()).toHaveLength(testMockData.length);
   })
 })

@@ -1,16 +1,10 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import PropTypes from 'prop-types'
 
-export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelected=false, currentIndex=-1}) => {
+export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelected=false, resetCurrentIndex=false}) => {
   const searchValueToLowerCase = searchValue.toLowerCase()
   const resultsList = useRef(null)
-
-  useEffect(() => {
-    document.addEventListener('keydown', event => handleKeyBoardSupport(event))
-
-    if(setItemAsSelected) setFirstItemAsSelected()
-
-    return document.removeEventListener('keyDown', handleKeyBoardSupport)
-  }, [])
+  let currentIndex = -1
 
   const handleKeyBoardSupport = (event) => {
     const listItems = resultsList.current.children;
@@ -27,7 +21,7 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
 
     if(event.key === 'ArrowDown') {
       if(currentIndex === -1) setFirstItemAsSelected()
-      if(currentIndex === listItems.length) return
+      if(currentIndex === listItems.length - 1) return
 
       currentIndex++
 
@@ -40,6 +34,7 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
       [...listItems].forEach(item => (item.tabIndex === currentIndex) && item.children[0].click())
     }
   }
+
 
   const setFirstItemAsSelected = () => {
     const listItems = resultsList.current.children;
@@ -60,13 +55,22 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
     })
   }
 
+  useEffect(() => {
+    if(setItemAsSelected) setFirstItemAsSelected()
+    if(resetCurrentIndex) currentIndex = -1
+
+    document.addEventListener('keydown', event => handleKeyBoardSupport(event))
+
+    return document.removeEventListener('keyDown', handleKeyBoardSupport)
+  }, [handleKeyBoardSupport, setItemAsSelected, resetCurrentIndex])
 
   return (
+    <>
     <div className={(searchResults.length > 0) ? "search-results search-resutls--fade-in" : "search-results"} role="listbox" id="search-results" ref={resultsList}>
       {[...searchResults].map((item, index) => {
         const name = item.searchterm.toLowerCase()
         return (
-          <a href={`#${name.split(' ').join('').toLowerCase()}`}
+          <a href={`#${name.split(' ').join('')}`}
             key={`${item}--${index}`}
             aria-label={name}
             role="option"
@@ -83,8 +87,14 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
           </a>
         )
       })}
-		</div>
+    </div>
+    </>
 	)
+}
+
+SearchResults.propTypes = {
+  searchValue: PropTypes.string,
+  searchResults: PropTypes.array,
 }
 
 export default SearchResults

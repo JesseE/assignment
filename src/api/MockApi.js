@@ -1,9 +1,9 @@
-const getMockData = async(searchValue) => {
-  const result = await fetch(`http://localhost:3000/search?searchterm=${searchValue}`)
+const getMockData = async(searchValue="", host, searchEndpoint) => {
+  const results = await fetch(`${host}${searchEndpoint}?searchterm=${searchValue}`)
     .then(res => res.json())
-    .catch(err => err)
+    .catch(err => console.error(err))
 
-  return result
+  return results
 }
 
 export {getMockData}

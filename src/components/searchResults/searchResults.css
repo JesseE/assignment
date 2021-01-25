@@ -21,6 +21,8 @@
   text-decoration: none;
   color: black;
   outline: none;
+  font-family: OpenSans, Arial, Helvetica, sans-serif;
+  font-size: 0.875rem;
 }
 
 .search-results-link--focused {
@@ -33,7 +35,7 @@
 }
 
 .search-results-letter--bold {
-  font-weight: bold;
+  font-weight: 700;
 }
 
 @media only screen and (min-width: 480px) {

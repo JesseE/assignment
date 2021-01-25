@@ -1,68 +1,66 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import SearchResults from '../searchResults/searchResults'
 import { ReactComponent as SearchIcon} from '../../assets/icons/search.svg'
 import { ReactComponent as CrossIcon } from '../../assets/icons/cross.svg'
 import { ReactComponent as ExclamationMark } from '../../assets/icons/exclamation-mark.svg'
+import { getMockData } from '../../api/MockApi';
 
-export const SearchBar = ({ label, searchInputValue="" }) => {
+export const SearchBar = ({ label, value="", state="" }) => {
   const noResultsState = 'No results found with: '
   const notValidState = 'Not a valid input. Only alpha numeric values are accepted'
-  const defaultState = 'Idle'
+  const defaultState = ''
   const errorState = 'Error occured while quering data'
   const isValidAlphaNumericStringExp = new RegExp(/^[\w\-\s]+$/)
   const host = 'http://localhost:3000'
   const searchEndpoint = '/search'
-
-  const [ searchBarState, setSearchBarState ] = useState(defaultState)
-	const [ searchValue, setSearchValue] = useState(searchInputValue)
+  const minLengthSearchValue = 2
+  const [ searchBarState, setSearchBarState ] = useState(state)
+	const [ searchValue, setSearchValue] = useState(value)
   const [ searchResults, setSearchResults] = useState([])
   const [ inputIsFocused, setInputIsFocused ] = useState(false)
-  const [ currentIndex, setCurrentIndex ] = useState(-1)
+  const [ resetIndex, setResetIndex ] = useState(false)
+  const validateSearchValue = (value) => isValidAlphaNumericStringExp.test(value)
 
-	useEffect(() => {
+  const fetchData = async() => {
+    if(validateSearchValue(searchValue)) {
+      const results = await getMockData(searchValue, host, searchEndpoint)
 
-    if([...searchValue].length > 2) {
-      fetchData(searchValue)
+      if(results === undefined) return setSearchBarState(errorState)
+
+      const searchValueFound = results.suggestions.map(({searchterm}) => searchterm.toLowerCase())
+      const checkIfTrue = item => item.includes(searchValue.toLowerCase())
+
+      if (searchValueFound.some(checkIfTrue)) {
+        const filterValues = results.suggestions
+          .filter(({ searchterm }) => searchterm.includes(searchValue))
+
+        setSearchResults(filterValues)
+        setSearchBarState(defaultState)
+      } else {
+        setSearchBarState(noResultsState)
+      }
+
+      if(searchValue === '') return setSearchBarState(noResultsState)
     } else {
-      setSearchResults([])
+      setSearchBarState(notValidState)
     }
+  }
 
+  const clearInput = () => {
+    setSearchValue("")
+    setResetIndex(true)
+  }
+
+  useEffect(() => {
+    ([...searchValue].length >= minLengthSearchValue)
+      ? fetchData()
+      : setSearchResults([])
+
+    setResetIndex(false)
     if(searchValue === '') return setSearchBarState(defaultState)
 	}, [searchValue])
 
-  const fetchData = (searchValue) => {
-		const results = fetch(`${host}${searchEndpoint}?searchterm=${searchValue}`)
-			.then(res => res.json())
-			.then(data => {
-        const searchValueFound = data.suggestions.map(({searchterm}) => searchterm.toLowerCase())
-        const checkIfTrue = item => item.includes(searchValue.toLowerCase())
-
-        if (searchValueFound.some(checkIfTrue)) {
-          const filterValues = data.suggestions
-            .filter(({searchterm}) => searchterm.includes(searchValue))
-
-          setSearchResults(filterValues)
-          setSearchBarState(defaultState)
-        } else {
-          setSearchBarState(noResultsState)
-        }
-
-        if(searchValue === '') return setSearchBarState(noResultsState)
-			})
-			.catch(err => {
-        setSearchBarState(errorState)
-        return err
-      })
-
-		return results
-  }
-
-  const validateSearchValue = (value) => isValidAlphaNumericStringExp.test(value)
-  const clearInput = () => {
-    setSearchValue("")
-    setCurrentIndex(-1)
-  }
 	return (
     <>
       <form className="searchbar" aria-haspopup="listbox" aria-expanded={searchResults.length > 0 ? "true": "false"} role="combobox"
@@ -82,7 +80,7 @@ export const SearchBar = ({ label, searchInputValue="" }) => {
         />
         <button className={`searchbar-icon ${searchValue === '' ? 'is-hidden' : 'searchbar-icon--cross'} `}
           aria-label="Clear search value"
-          onClick={() => clearInput()}>
+          onClick={clearInput}>
           <CrossIcon />
         </button>
         <div className="searchbar-icon">
@@ -96,19 +94,27 @@ export const SearchBar = ({ label, searchInputValue="" }) => {
         </div>
       }
 
-      { searchBarState === notValidState && !searchResults.length > 0 &&
+      { searchBarState === notValidState && !searchResults.length > 0  &&
         <div id="selected-option" className="searchbar-message searchbar-message--not-valid">
           <ExclamationMark /><span>{searchBarState}</span>
         </div>
       }
 
-      { searchResults && <SearchResults searchResults={searchResults} searchValue={searchValue} currentIndex={currentIndex}/> }
+      { searchBarState === errorState || errorState === state &&
+        <div id="selected-option" className="searchbar-message searchbar-message--not-valid">
+          <ExclamationMark /> <span>{searchBarState || state}</span>
+        </div>
+      }
+
+      { searchResults && <SearchResults searchResults={searchResults} searchValue={searchValue} resetIndex={resetIndex} /> }
     </>
 	)
 }
 
 SearchBar.propTypes = {
-	label: PropTypes.string
+  label: PropTypes.string,
+  state: PropTypes.string,
+  value: PropTypes.string
 }
 
 export default SearchBar

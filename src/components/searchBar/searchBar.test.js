@@ -7,7 +7,7 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 describe('SearchBar component', () => {
-  const wrapper = shallow(<SearchBar />)
+  const wrapper = shallow(<SearchBar  />)
 
   it('Render component without crashing', () => {
     const div = document.createElement('div')
@@ -28,6 +28,7 @@ describe('SearchBar component', () => {
 
     wrapper.find('.searchbar-input').simulate('change', {target: { value: newTextValue }})
 
+    expect(wrapper.find('.searchbar-input').props().value).toBe('trui')
     expect(wrapper.find('.searchbar-icon--cross')).toHaveLength(1)
   })
 
@@ -38,5 +39,6 @@ describe('SearchBar component', () => {
     wrapper.find('.searchbar-icon--cross').simulate('click')
 
     expect(wrapper.find('.searchbar-icon--cross')).toHaveLength(0)
+    expect(wrapper.find('.searchbar-input').props().value).toBe('')
   })
 })

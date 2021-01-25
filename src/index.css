@@ -1,11 +1,28 @@
 @import './components/searchBar/searchBar.css';
 @import './components/searchResults/searchResults.css';
 
+@font-face {
+  font-family: 'OpenSans';
+  src: url('./fonts/OpenSans-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 700;
+  src: url('./fonts/OpenSans-Bold.ttf');
+}
+
+@font-face {
+  font-family: 'OpenSans';
+  font-weight: 300;
+  src: url('./fonts/OpenSans-Light.ttf');
+}
+
 html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  font-family: OpenSans, sans-serif;
 }
 
 #root {
