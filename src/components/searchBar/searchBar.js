@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { debounce } from 'lodash'
 import PropTypes from 'prop-types'
 import SearchResults from '../searchResults/searchResults'
 import { ReactComponent as SearchIcon} from '../../assets/icons/search.svg'
@@ -11,41 +12,46 @@ export const SearchBar = ({ label, value="", state="" }) => {
   const notValidState = 'Not a valid input. Only alpha numeric values are accepted'
   const defaultState = ''
   const errorState = 'Error occured while quering data'
-  const isValidAlphaNumericStringExp = new RegExp(/^[\w\-\s]+$/)
+  const isValidAlphaNumericStringExp = new RegExp(/^[\w\-\s]+$/) //only accept alpha numeric values
   const host = 'http://localhost:3000'
   const searchEndpoint = '/search'
   const minLengthSearchValue = 2
+  const debounceTimeAmount = 200
   const [ searchBarState, setSearchBarState ] = useState(state)
 	const [ searchValue, setSearchValue] = useState(value)
   const [ searchResults, setSearchResults] = useState([])
   const [ inputIsFocused, setInputIsFocused ] = useState(false)
   const [ resetIndex, setResetIndex ] = useState(false)
+
   const validateSearchValue = (value) => isValidAlphaNumericStringExp.test(value)
 
-  const fetchData = async() => {
-    if(validateSearchValue(searchValue)) {
-      const results = await getMockData(searchValue, host, searchEndpoint)
+  const fetchData = debounce(
+    async () => {
+      if(validateSearchValue(searchValue)) {
+        const results = await getMockData(searchValue, host, searchEndpoint)
 
-      if(results === undefined) return setSearchBarState(errorState)
+        if(results === undefined) return setSearchBarState(errorState)
 
-      const searchValueFound = results.suggestions.map(({searchterm}) => searchterm.toLowerCase())
-      const checkIfTrue = item => item.includes(searchValue.toLowerCase())
+        const searchValueFound = results.suggestions.map(({searchterm}) => searchterm.toLowerCase())
+        const checkIfTrue = item => item.includes(searchValue.toLowerCase())
 
-      if (searchValueFound.some(checkIfTrue)) {
-        const filterValues = results.suggestions
-          .filter(({ searchterm }) => searchterm.includes(searchValue))
+        if (searchValueFound.some(checkIfTrue)) {
+          const filterValues = results.suggestions
+            .filter(({ searchterm }) => searchterm.includes(searchValue))
 
-        setSearchResults(filterValues)
-        setSearchBarState(defaultState)
+          setSearchResults(filterValues)
+          setSearchBarState(defaultState)
+        } else {
+          setSearchBarState(noResultsState)
+        }
+
+        if(searchValue === '') return setSearchBarState(noResultsState)
       } else {
-        setSearchBarState(noResultsState)
+        setSearchBarState(notValidState)
       }
-
-      if(searchValue === '') return setSearchBarState(noResultsState)
-    } else {
-      setSearchBarState(notValidState)
-    }
-  }
+    },
+    debounceTimeAmount
+  )
 
   const clearInput = () => {
     setSearchValue("")
@@ -71,7 +77,7 @@ export const SearchBar = ({ label, value="", state="" }) => {
           aria-label="search-results"
           aria-autocomplete="list"
           aria-activedescendant="selected-option"
-          value={searchValue}
+          value={searchValue.toLowerCase()}
           onFocus={() => setInputIsFocused(true)}
           onChange={event => validateSearchValue(event.target.value) || (event.target.value === "")
             ? setSearchValue(event.target.value)

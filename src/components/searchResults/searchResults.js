@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 
 export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelected=false, resetCurrentIndex=false}) => {
   const searchValueToLowerCase = searchValue.toLowerCase()
   const resultsList = useRef(null)
   let currentIndex = -1
+  const itemFocusedClass = 'search-results-link--focused'
+  const ariaSelectdId= 'selected-option'
 
   const handleKeyBoardSupport = (event) => {
     const listItems = resultsList.current.children;
@@ -13,10 +15,7 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
       if(currentIndex === 0) return
 
       currentIndex--
-
-      [...listItems].forEach(item => (item.tabIndex === currentIndex)
-        ? (item.ariaSelected = true, item.focus(), item.id="selected-option", item.classList.add('search-results-link--focused'))
-        : (item.ariaSelected = false, item.id = "", item.classList.remove('search-results-link--focused')))
+      setSelectedItemAsFocused(listItems)
     }
 
     if(event.key === 'ArrowDown') {
@@ -24,30 +23,28 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
       if(currentIndex === listItems.length - 1) return
 
       currentIndex++
-
-      [...listItems].forEach(item => (item.tabIndex === currentIndex)
-        ? (item.ariaSelected = true, item.focus(), item.id="selected-option", item.classList.add('search-results-link--focused'))
-        : (item.ariaSelected = false, item.id = "", item.classList.remove('search-results-link--focused')))
-    }
-
-    if(event.key === 'Enter') {
-      [...listItems].forEach(item => (item.tabIndex === currentIndex) && item.children[0].click())
+      setSelectedItemAsFocused(listItems)
     }
   }
 
+  const setSelectedItemAsFocused = (listItems) => {
+    [...listItems].forEach(item => (item.tabIndex === currentIndex)
+      ? (item.ariaSelected = true, item.focus(), item.id=ariaSelectdId, item.classList.add(itemFocusedClass))
+      : (item.ariaSelected = false, item.id = "", item.classList.remove(itemFocusedClass)))
+  }
 
   const setFirstItemAsSelected = () => {
     const listItems = resultsList.current.children;
 
     [...listItems].map((item, index) => {
       if(index === 0) {
-        item.classList.add('search-results-link--focused')
+        item.classList.add(itemFocusedClass)
         item.ariaSelected = true
         item.tabIndex = 0
-        item.id="selected-option"
+        item.id=ariaSelectdId
         return item.focus()
       } else {
-        item.classList.remove('search-results-link--focused')
+        item.classList.remove(itemFocusedClass)
         item.ariaSelected = false
         item.id = ""
         return item.tabIndex = index
@@ -75,8 +72,8 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
             aria-label={name}
             role="option"
             aria-selected={index === 0 ? true : false}
-            id={index === 0 ? "selected-option" : ""}
-            className={"search-results-link"}
+            id={index === 0 ? ariaSelectdId : ""}
+            className="search-results-link"
           >
             {[...name].map((letter, index) =>
               (searchValueToLowerCase.includes(letter))
