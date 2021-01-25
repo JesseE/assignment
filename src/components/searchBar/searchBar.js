@@ -65,6 +65,7 @@ export const SearchBar = ({ label, value="", state="" }) => {
 
     setResetIndex(false)
     if(searchValue === '') return setSearchBarState(defaultState)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchValue])
 
 	return (

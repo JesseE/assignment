@@ -63,7 +63,8 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
 
   return (
     <>
-    <div className={(searchResults.length > 0) ? "search-results search-resutls--fade-in" : "search-results"} role="listbox" id="search-results" ref={resultsList}>
+    <div className={(searchResults.length > 0) ? "search-results search-resutls--fade-in" : "search-results"}
+         role="listbox" id="search-results" ref={resultsList}>
       {[...searchResults].map((item, index) => {
         const name = item.searchterm.toLowerCase()
         return (
