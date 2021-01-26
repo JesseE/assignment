@@ -107,9 +107,15 @@ export const SearchBar = ({ label, value="", state="" }) => {
         </div>
       }
 
-      { searchBarState === errorState || errorState === state &&
+      { searchBarState === errorState &&
         <div id="selected-option" className="searchbar-message searchbar-message--not-valid">
-          <ExclamationMark /> <span>{searchBarState || state}</span>
+          <ExclamationMark /> <span>{searchBarState}</span>
+        </div>
+      }
+
+      { errorState === state &&
+        <div id="selected-option" className="searchbar-message searchbar-message--not-valid">
+          <ExclamationMark /><span>{state}</span>
         </div>
       }
 

@@ -54,6 +54,7 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
 
   useEffect(() => {
     if(setItemAsSelected) setFirstItemAsSelected()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     if(resetCurrentIndex) currentIndex = -1
 
     document.addEventListener('keydown', event => handleKeyBoardSupport(event))
@@ -67,9 +68,10 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
          role="listbox" id="search-results" ref={resultsList}>
       {[...searchResults].map((item, index) => {
         const name = item.searchterm.toLowerCase()
+
         return (
           <a href={`#${name.split(' ').join('')}`}
-            key={`${item}--${index}`}
+            key={`${name}--${index}`}
             aria-label={name}
             role="option"
             aria-selected={index === 0 ? true : false}
@@ -77,7 +79,7 @@ export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelec
             className="search-results-link"
           >
             {[...name].map((letter, index) =>
-              (searchValueToLowerCase.includes(letter))
+              searchValueToLowerCase.includes(letter)
                 ? <span className="search-results-letter search-results-letter--bold" key={`${letter}--${index}`}>{letter}</span>
                 : <span className="search-results-letter" key={`${letter}--${index}`}>{letter}</span>
             )}
