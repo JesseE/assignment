@@ -4,7 +4,7 @@ import { SearchBar } from './components/searchBar/searchBar'
 
 const App = () => {
   const props = {
-    label: 'Search'
+    label: 'Zoeken'
   }
 
   return (
