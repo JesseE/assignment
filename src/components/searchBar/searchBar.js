@@ -66,6 +66,8 @@ export const SearchBar = ({ label, value="", state="" }) => {
     setResetIndex(false)
     if(searchValue === '') return setSearchBarState(defaultState)
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
+
 	}, [searchValue])
 
 	return (
@@ -79,6 +81,7 @@ export const SearchBar = ({ label, value="", state="" }) => {
           aria-autocomplete="list"
           aria-activedescendant="selected-option"
           value={searchValue.toLowerCase()}
+          onBlur={() => setInputIsFocused(false)}
           onFocus={() => setInputIsFocused(true)}
           onChange={event => validateSearchValue(event.target.value) || (event.target.value === "")
             ? setSearchValue(event.target.value)
