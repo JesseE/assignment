@@ -1,93 +1,85 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 
-export const SearchResults = ({ searchResults=[], searchValue="", setItemAsSelected=false, resetCurrentIndex=false}) => {
-  const searchValueToLowerCase = searchValue.toLowerCase()
+export const SearchResults = ({ searchResults=[], searchValue="", resetCurrentIndex=false}) => {
   const resultsList = useRef(null)
-  let currentIndex = -1
-  const itemFocusedClass = 'search-results-link--focused'
-  const ariaSelectdId= 'selected-option'
+  const searchValueToLowerCase = searchValue.toLowerCase()
+
+  const [ listItems, setListItems ] = useState(searchResults)
+  let [ currentIndex, setCurrentIndex ] = useState(-1)
 
   const handleKeyBoardSupport = (event) => {
-    const listItems = resultsList.current.children;
-
     if(event.key === 'ArrowUp') {
       if(currentIndex === 0) return
-
-      currentIndex--
-      setSelectedItemAsFocused(listItems)
+      setCurrentIndex(currentIndex--)
+      setSelectedItemAsFocused()
     }
 
-    if(event.key === 'ArrowDown') {
-      if(currentIndex === -1) setFirstItemAsSelected()
+    if(event.key === 'ArrowDown' || event.key === 'Tab') {
       if(currentIndex === listItems.length - 1) return
 
-      currentIndex++
-      setSelectedItemAsFocused(listItems)
+      setCurrentIndex(currentIndex++)
+      setSelectedItemAsFocused()
     }
   }
 
-  const setSelectedItemAsFocused = (listItems) => {
-    [...listItems].forEach(item => (item.tabIndex === currentIndex)
-      ? (item.ariaSelected = true, item.focus(), item.id=ariaSelectdId, item.classList.add(itemFocusedClass))
-      : (item.ariaSelected = false, item.id = "", item.classList.remove(itemFocusedClass)))
-  }
+  const setSelectedItemAsFocused = () => {
+    const addSelectedState = [...listItems].map(item => {
+      const selected = (item.tabindex === currentIndex) ? true : false
 
-  const setFirstItemAsSelected = () => {
-    const listItems = resultsList.current.children;
-
-    [...listItems].map((item, index) => {
-      if(index === 0) {
-        item.classList.add(itemFocusedClass)
-        item.ariaSelected = true
-        item.tabIndex = 0
-        item.id=ariaSelectdId
-        return item.focus()
-      } else {
-        item.classList.remove(itemFocusedClass)
-        item.ariaSelected = false
-        item.id = ""
-        return item.tabIndex = index
+      return {
+        ...item,
+        selected
       }
     })
+
+    setListItems(addSelectedState)
   }
 
   useEffect(() => {
-    if(setItemAsSelected) setFirstItemAsSelected()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    if(resetCurrentIndex) currentIndex = -1
+    const newSearchResults = [...searchResults].map((item,index) => {
+      return {
+        ...item,
+        tabindex: index,
+        selected: false
+      }
+    })
+
+    setListItems(newSearchResults)
+
+    if(resetCurrentIndex) setCurrentIndex(-1)
 
     document.addEventListener('keydown', event => handleKeyBoardSupport(event))
 
     return document.removeEventListener('keyDown', handleKeyBoardSupport)
-  }, [handleKeyBoardSupport, setItemAsSelected, resetCurrentIndex])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetCurrentIndex, searchResults])
 
   return (
     <>
-    <div className={(searchResults.length > 0) ? "search-results search-resutls--fade-in" : "search-results"}
-         role="listbox" id="search-results" ref={resultsList}>
-      {[...searchResults].map((item, index) => {
-        const name = item.searchterm.toLowerCase()
+      <div className={(listItems.length > 0) ? "search-results search-resutls--fade-in" : "search-results"}
+          role="listbox" id="search-results" ref={resultsList}>
+        {[...listItems].map((item, index) => {
+          const name = item.searchterm
 
-        return (
-          <a href={`#${name.split(' ').join('')}`}
-            key={`${name}--${index}`}
-            aria-label={name}
-            role="option"
-            aria-selected={index === 0 ? true : false}
-            id={index === 0 ? ariaSelectdId : ""}
-            className="search-results-link"
-          >
-            {[...name].map((letter, index) =>
-              searchValueToLowerCase.includes(letter)
-                ? <span className="search-results-letter search-results-letter--bold" key={`${letter}--${index}`}>{letter}</span>
-                : <span className="search-results-letter" key={`${letter}--${index}`}>{letter}</span>
-            )}
-            <span> ({item.nrResults})</span>
-          </a>
-        )
-      })}
-    </div>
+          return (
+            <a href={`#${name.split(' ').join('')}`}
+              key={`${name}--${index}`}
+              aria-label={name}
+              role="option"
+              aria-selected={item.selected}
+              className={`search-results-link ${item.selected && 'search-results-link--focused'}`}
+            >
+              {[...name].map((letter, index) =>
+                searchValueToLowerCase.includes(letter)
+                  ? <span className="search-results-letter search-results-letter--bold" key={`${letter}--${index}`}>{letter}</span>
+                  : <span className="search-results-letter" key={`${letter}--${index}`}>{letter}</span>
+              )}
+              <span> ({item.nrResults})</span>
+            </a>
+          )
+        })}
+      </div>
     </>
 	)
 }

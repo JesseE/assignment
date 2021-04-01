@@ -29,6 +29,10 @@ export const SearchBar = ({ label="", value="", state="" }) => {
     async () => {
       if(validateSearchValue(searchValue)) {
         const results = await getMockData(searchValue, host, searchEndpoint)
+          .catch(err => {
+            console.error(err)
+            return setSearchBarState(errorState)
+          })
 
         if(results === undefined) return setSearchBarState(errorState)
 
